@@ -17,6 +17,9 @@ def persist(X, epsilon, hom, plot = False):
 
     REFERENCES
         Homology Calculation: https://giotto-ai.github.io/gtda-docs/latest/modules/homology.html
+
+    !TODO
+        NEED TO MODIFY THIS FUNCTION TO ALLOW FOR TRAJECTORYMAP GUARANTEED EDGES
     """
 
     persistence = VietorisRipsPersistence(metric="euclidean", homology_dimensions=hom, n_jobs=5)
