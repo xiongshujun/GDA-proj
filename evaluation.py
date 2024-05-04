@@ -92,7 +92,7 @@ def betti(X, epsilon, tolerance = 1e-5):
 def persist_precomputed(W, k, plot = True):
 
     """
-    Takes in distances at feature scale epsilon and returns output of VietorisRips package
+    Takes in distances at feature scale epsilon and returns a persistence diagram
 
     INPUTS
         W := precomputed distance matrix
