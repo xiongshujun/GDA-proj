@@ -17,7 +17,7 @@ Note that we do not need to consider smoothness of underlying activity space as 
 
 ## Datasets
 1) Eye saccade data: [NEED TO UPDATE ON SPECIFICS]
-2) Wheel rotation data: [NEED TO UPDATE ON SPECIFICS]
+2) Wheel rotation data: Neural Trajectories in the Supplementary Motor Area and Motor Cortex Exhibit Distinct Geometries, Compatible with Different Classes of Computation (Russo et al, 2018).
 
 We hypothesize that TrajectoryMap is more effective on tasks that require very time-dependent tasks, like motor behavior!
 
