@@ -188,4 +188,15 @@ def cluster(X, k, assign_labels = 'discretize'):
 #    EPSILON TIGHTENING   #
 ###########################
 
+"""
+The central idea behind epsilon tightening is that TrajectoryMap provides the *better* homology information than standard VR complexes.
+But what does "better" actually mean? Here, we propose that 
+    1) The same core homology information can be extracted from a TrajectoryMap complex than a VR complex at a much lower epsilon bound.
+            This also implies that we can denoise much more effectively with a TrajectoryMap
+    2) TrajectoryMap complexes are more *robust* at the same epsilon. In other words, given a TrajectoryMap complex and a VR complex both formed up to filtration value epsilon,
+            when new points not yet seen are evaluated, they are much more likely to lie within or closer to the TrajectoryMap complex compared to the VR complex
 
+To test the former, we just need to look at (and hopefully quantify) differences between persistent homology diagrams of TrajectoryMaps and VR complexes.
+
+To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
+"""
