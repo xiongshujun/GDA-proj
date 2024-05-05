@@ -1,8 +1,8 @@
 import numpy as np
-from gtda.homology import VietorisRipsPersistence
 import matplotlib.pyplot as plt
 
 import gudhi
+from sklearn.cluster import SpectralClustering
 
 ################################
 #      PERSISTENT HOMOLOGY     #
@@ -164,12 +164,25 @@ def persist_complex(S, E, plot = True):
 #   SPECTRAL CLUSTERING  #
 ##########################
 
+def cluster(X, k, assign_labels = 'discretize'):
+    """
+    Wrapper for scikit.learn.SpectralClustering
 
+    INPUTS
+        X := ndarray of original dataset
+        k := number of classes
+        assign_labels := passed 'assign_labels' parameter
+                            for more info, refer to https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html
 
+    OUTPUTS
+        labels := labels for each of the datapoints in order
+        clustering := post-fit SpectralClustering object
+    """
 
-
-
-
+    clustering = SpectralClustering(n_clusters=2,
+                                        assign_labels=assign_labels).fit(X)
+    
+    return clustering.labels_, clustering
 
 ###########################
 #    EPSILON TIGHTENING   #
