@@ -102,22 +102,22 @@ def persist_precomputed(W, k, plot = True):
     OUTPUTS
         diagram := an array of persistence diagrams computed from X
                     type : list of pairs(dimension, pair(birth, death))
-
+        st := SimplexTree made from the VR complex defined by W (precomputed distance matrix)
     REFERENCES
 
     """
 
     rc = gudhi.RipsComplex(distance_matrix = W)
-    simplex_tree = rc.create_simplex_tree(max_dimensions = k)
+    st = rc.create_simplex_tree(max_dimensions = k)
 
-    diagram = simplex_tree.persistence()
+    diagram = st.persistence()
     if plot:
         gudhi.plot_persistence_barcode(diagram)
         plt.show()
 
         gudhi.plot_persistence_diagram(diagram)
         plt.show()
-    return diagram
+    return diagram, st
 
 def persist_complex(S, E, plot = True):
     """
@@ -137,6 +137,7 @@ def persist_complex(S, E, plot = True):
     OUTPUTS
         diagram := an array of persistence diagrams computed from X
                     type : list of pairs(dimension, pair(birth, death))
+        st := SimplexTree formed by S, E pairs
     REFERENCES
         https://gudhi.inria.fr/python/latest/simplex_tree_ref.html
     """
@@ -157,7 +158,7 @@ def persist_complex(S, E, plot = True):
 
         gudhi.plot_persistence_diagram(diagram)
         plt.show()
-    return diagram
+    return diagram, st
 
 
 ##########################
@@ -200,3 +201,35 @@ To test the former, we just need to look at (and hopefully quantify) differences
 
 To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
 """
+
+def epsilon_tighten(vr_complex, tm_complex, Y, plot = False):
+    """
+    Given two partially-formed simplicial complexes at a given epsilon value, evaluate how well-contained each point in a test set is within the simplex by looking at
+        1) How much the homology changes
+            A) via differences in Betti numbers
+            B) via differences in persistent homology diagrams (e.g. barcodes) --> this only happens when plot == True
+        2) Does this point fit inside a face of a lower-level simplex?
+            !NOTE: in future work, this can also be quantified better by measuring distance from the nearest face
+    
+    INPUTS
+        X := train dataset, list of vectors that represent activity
+        Y := test dataset, list of vectors that represent activity
+
+
+    INTERMEDIARY VARIABLES
+        vr_complex := standard Vietoris-Rips complex in the form of a simplicial tree
+        tm_complex := TrajectoryMap complex in the form of a simplicial tree
+        
+    
+    OUTPUTS
+        betti_diff := <Betti numbers of the VR complex> - <Betti numbers of the TM complex> (w/ accounted padding)
+        acc_vr     := percentage accuracy of the VR complex in accounting for test set points
+        acc_tm     := percentage accuracy of the TrajectoryMap complex in accounting for test set points
+    """
+
+    acc_vr = 0
+    acc_tm = 0
+
+    # GET COMPLEXES
+
+    for i in range(len(Y)):
