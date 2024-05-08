@@ -1,3 +1,7 @@
+import numpy as np
+import gudhi
+import matplotlib.pyplot as plt
+
 """
 Class for Creating and Evaluating Feautures of Simplicial Complex
 """
@@ -69,7 +73,7 @@ class SimplicialComplex:
         assert len(self.edges) > 0, "Construct graph first"
         graph = nx.Graph()
         for i in range(len(self.vertices)):
-            graph.add_node(i, vector=vertices[i])
+            graph.add_node(i, vector=self.vertices[i])
         graph.add_edges_from(self.edges)
         cliques = nx.find_cliques(graph)
         extract_simplices = {}
