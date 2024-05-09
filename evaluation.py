@@ -213,8 +213,8 @@ def epsilon_tighten(X, Y, epsilon, plot = False):
             !NOTE: in future work, this can also be quantified better by measuring distance from the nearest face
     
     INPUTS
-        X := train dataset, list of vectors that represent activity
-        Y := test dataset, list of vectors that represent activity
+        X := train dataset as an xr.DataArray, list of vectors that represent activity
+        Y := test dataset as an xr.DataArray, list of vectors that represent activity
         epsilon := feature scale chosen to build the complexes
 
     INTERMEDIARY VARIABLES
