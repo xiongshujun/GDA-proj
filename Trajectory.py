@@ -1,13 +1,3 @@
-"""
-General Class Container for Neural Data
-"""
-import os
-import scipy.io as sio
-import numpy as np
-import xarray as xr
-import pandas as pd
-
-
 class zfSessionData:
     def __init__(self, fish=[], method='ep'):
         self.base_dir = "/Users/samart/Documents/Geometric DA/Final Project/RamirezPaperData/analyzedBehaviorAndImaging"        
