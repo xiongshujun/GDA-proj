@@ -154,7 +154,3 @@ class SimplicialComplex:
             
     def boundary_matrix(self):
         pass
-
-
-
-print("Y")
