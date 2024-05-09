@@ -9,6 +9,7 @@ Class for Creating and Evaluating Feautures of Simplicial Complex
 
 
 class SimplicialComplex:
+
     def __init__(self, trajectories):
         """
         Input: 
@@ -20,10 +21,10 @@ class SimplicialComplex:
         self.N = trajectories[0].shape[0]
         self.trajectories = trajectories
         self.vertices = []
-        self.edges = set()
+        self.base_edges = set()
         self.pairwise_distances = -1
         self.graph = -1
-        self.simplices = -1 # for k>=2
+        self.simplices = [] # for k>=2
         
         for t in trajectories:
             self.add_trajectory(t)
@@ -34,19 +35,25 @@ class SimplicialComplex:
         self.simplices = -1 # for k>=2
 
     def construct_simplex(self, epsilon):
-        self.compute_pairwise_distances()
-        self.connect_edges(epsilon)
-        self.form_k_simplices(epsilon)
+
+        if(type(self.pairwise_distances) == int):
+            self.compute_pairwise_distances()
+
+        new_edges = self.connect_edges(epsilon)
+        self.form_k_simplices(new_edges, epsilon)
 
     def add_trajectory(self, trajectory, connect_frames=True):
+
         N, T = trajectory.shape
         assert N == self.N, "trajectory dimensionality does not match" 
+        
         for i, t in enumerate(trajectory['T']):
             v = trajectory.sel(T=t).data
             v_index = len(self.vertices)
             self.vertices.append(v)
             if(i > 0 and connect_frames): # connect to previous state vector in trajectory
-                self.edges.add((v_index-1, v_index))
+                self.base_edges.add((v_index-1, v_index))
+
         self.pairwise_distances = -1 # reset
         self.graph = -1
     
@@ -59,34 +66,37 @@ class SimplicialComplex:
         
     def connect_edges(self, epsilon, add=True):
         new_edges = []
-        if(type(self.pairwise_distances) == int):
-            self.compute_pairwise_distances()
+        
         row_indices, col_indices = np.where(self.pairwise_distances < epsilon)
         for i, j in zip(row_indices, col_indices):
             if(i!=j):
                 new_edges.append((i,j))
-        if(add):
-            self.edges = self.edges.union(set(new_edges))
-        return(new_edges)
+        if add:
+            new_edges = self.base_edges.union(set(new_edges))
+        return new_edges
 
-    def form_k_simplices(self, epsilon):
+    def form_k_simplices(self, edges, epsilon):
+
         assert len(self.vertices) > 0, "Construct graph first"
-        assert len(self.edges) > 0, "Construct graph first"
+        assert len(self.base_edges) > 0, "Construct graph first"
+
         graph = nx.Graph()
         for i in range(len(self.vertices)):
             graph.add_node(i, vector=self.vertices[i])
-        graph.add_edges_from(self.edges)
+        graph.add_edges_from(edges)
         cliques = nx.find_cliques(graph)
         extract_simplices = {}
+
         for c in cliques:
             k = len(c)
             if(k>2): 
                 if(k not in extract_simplices.keys()):
                     extract_simplices[k] = []
                 extract_simplices[k].append(c)
-        self.simplices = extract_simplices
-        self.graph = graph
-        return(graph, extract_simplices)
+
+        self.simplices.append(extract_simplices)
+        self.graph.append(graph)
+        return (graph, extract_simplices)
 
     def draw(self):
         nx.draw(self.graph, with_labels=True, node_color='skyblue', node_size=200, font_size=12)
