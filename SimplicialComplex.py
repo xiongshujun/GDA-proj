@@ -1,6 +1,7 @@
 import numpy as np
 import gudhi
 import matplotlib.pyplot as plt
+import networkx as nx
 
 """
 Class for Creating and Evaluating Feautures of Simplicial Complex
