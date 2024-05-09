@@ -1,3 +1,9 @@
+import os
+import pandas as pd
+import xarray as xr
+import numpy  as np
+import scipy.io as sio
+
 class zfSessionData:
     def __init__(self, fish=[], method='ep'):
         self.base_dir = "/Users/samart/Documents/Geometric DA/Final Project/RamirezPaperData/analyzedBehaviorAndImaging"        
