@@ -1,12 +1,11 @@
-import numpy as np
-import gudhi
-import matplotlib.pyplot as plt
-import networkx as nx
-
 """
 Class for Creating and Evaluating Feautures of Simplicial Complex
 """
-
+import numpy as np 
+import networkx as nx
+import xarray as xr
+import gudhi
+import matplotlib.pyplot as plt
 
 class SimplicialComplex:
 
@@ -21,85 +20,75 @@ class SimplicialComplex:
         self.N = trajectories[0].shape[0]
         self.trajectories = trajectories
         self.vertices = []
-        self.base_edges = set()
-        self.pairwise_distances = -1
-        self.graph = -1
-        self.simplices = [] # for k>=2
+        self.edges = {}
+        self.graphs = {}
+        self.simplices = {} # for k>=2
         
         for t in trajectories:
             self.add_trajectory(t)
+        self.compute_pairwise_distances()
 
-    def reset(self):
-        self.pairwise_distances = -1
-        self.graph = -1
-        self.simplices = -1 # for k>=2
-
-    def construct_simplex(self, epsilon, store = True):
-
-        if(type(self.pairwise_distances) == int):
-            self.compute_pairwise_distances()
-
-        new_edges = self.__connect_edges(epsilon)
-        graph, new_simplex = self.__form_k_simplices(new_edges, epsilon, store)
-
-        return graph, new_simplex
-
-    def add_trajectory(self, trajectory, connect_frames=True):
-
-        N, T = trajectory.shape
-        assert N == self.N, "trajectory dimensionality does not match" 
-        
-        for i, t in enumerate(trajectory['T']):
-            v = trajectory.sel(T=t).data
-            v_index = len(self.vertices)
-            self.vertices.append(v)
-            if(i > 0 and connect_frames): # connect to previous state vector in trajectory
-                self.base_edges.add((v_index-1, v_index))
-
-        self.pairwise_distances = -1 # reset
-        self.graph = -1
-    
     def compute_pairwise_distances(self):
         vertices = np.array(self.vertices)
         V, D = vertices.shape
         pairwise_diff = vertices[:, np.newaxis, :] - vertices[np.newaxis, :, :]
         pairwise_distances = np.linalg.norm(pairwise_diff, axis=2)
         self.pairwise_distances = pairwise_distances
-        
-    def __connect_edges(self, epsilon, add=True):
+
+    def add_trajectory(self, trajectory, connect_frames=True):
+        N, T = trajectory.shape
+        assert N == self.N, "trajectory dimensionality does not match" 
+        self.edges['trajectory'] = set()
+        for i in range(T):
+            v = trajectory.isel(T=i).data
+            v_index = len(self.vertices)
+            self.vertices.append(v)
+            if(i > 0 and connect_frames): # connect to previous state vector in trajectory
+                self.edges['trajectory'].add((v_index-1, v_index))
+        self.compute_pairwise_distances()
+
+
+    def connect_edges(self, epsilon):
         new_edges = []
-        
-        row_indices, col_indices = np.where(self.pairwise_distances < epsilon)
+        dists = np.triu(self.pairwise_distances, k=0) # ignore lower half
+        row_indices, col_indices = np.where(np.logical_and(dists<epsilon, dists>0))
         for i, j in zip(row_indices, col_indices):
-            if(i!=j):
-                new_edges.append((i,j))
-        if add:
-            new_edges = self.base_edges.union(set(new_edges))
-        return new_edges
-
-    def __form_k_simplices(self, edges, epsilon, store = True):
-
-        assert len(self.vertices) > 0, "Construct graph first"
-        assert len(self.base_edges) > 0, "Construct graph first"
-
+            new_edges.append((i,j))
+        self.edges[epsilon] = set(new_edges)
+    
+    def all_edges(self, epsilon):
+        if(epsilon not in self.edges.keys()):
+            print("Eps not found, connecting edges")
+            self.connect_edges(epsilon)
+        edges = self.edges[epsilon]  
+        edges = edges.union(self.edges['trajectory'])
+        return(edges)
+    
+    def form_graph(self, eps):
         graph = nx.Graph()
-        for i in range(len(self.vertices)):
-            graph.add_node(i, vector=self.vertices[i])
+        for i,v in enumerate(self.vertices):
+            graph.add_node(i, vector=v)
+        edges = self.all_edges(eps)
+        print(f"Forming graph with {len(self.vertices)} vertices and {len(edges)} edges")
         graph.add_edges_from(edges)
+        self.graphs[eps] = graph
+        return(graph)
+
+    def form_k_simplices(self, epsilon, kmax):
+        if(epsilon not in self.graphs.keys()):
+            graph = self.form_graph(epsilon)
+        else:
+            graph = self.graphs[epsilon]
         cliques = nx.find_cliques(graph)
         extract_simplices = {}
-
         for c in cliques:
             k = len(c)
-            if(k>2): 
+            if(k>2 and k<= kmax): 
                 if(k not in extract_simplices.keys()):
                     extract_simplices[k] = []
                 extract_simplices[k].append(c)
-
-        if store:
-            self.simplices.append(extract_simplices)
-            self.graph.append(graph)
-        return (graph, extract_simplices)
+        self.simplices[epsilon] = extract_simplices
+        return(extract_simplices)
 
     def draw(self):
         nx.draw(self.graph, with_labels=True, node_color='skyblue', node_size=200, font_size=12)

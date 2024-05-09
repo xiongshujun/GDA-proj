@@ -4,6 +4,8 @@ General Class Container for Neural Data
 import os
 import scipy.io as sio
 import numpy as np
+import xarray as xr
+import pandas as pd
 
 
 class zfSessionData:
@@ -50,8 +52,16 @@ class zfSessionData:
         fname = os.path.join(self.behavior, f"{fish}_{idx}.mat")
         data = sio.loadmat(fname)
         return(data)
+
+    def load_motor_trajectory(self, norm=False):
+        df = pd.read_csv("motor_data.csv").drop(['Unnamed: 0'], axis=1)
+        t, N = df.values.shape # num_samples x num_cells
+        da = xr.DataArray(df.values.T, dims=('N', 'T'), coords={'N' : np.arange(1, N+1), 'T' : np.arange(0, t)})
+        if(norm):
+            da = (da - da.mean(dim='T')) / da.mean(dim='T')
+        return(da)
     
-    def load_trajectory(self, fish, idx):
+    def load_fish_trajectory(self, fish, idx):
         # idx belongs to different OG tiff files (RHB vs non RHB?), likely z planes
         fluor = self.data[fish]['fluor'][idx]
         loc = self.data[fish]['cellLocations'][idx]
@@ -64,4 +74,3 @@ class zfSessionData:
                                                         'X' : (('N',), loc[:,0]), 'Y' : (('N',), loc[:,1])})
         
         return(da)
-
