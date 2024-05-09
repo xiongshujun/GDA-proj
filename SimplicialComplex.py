@@ -119,9 +119,10 @@ class SimplicialComplex:
             plt.show()
         return diagram, st
     
-    def persist_complex(self, E, plot = True):
+    def persist_complex(self, max_epsilon, plot = True):
 
         st = gudhi.SimplexTree()
+        E = np.arange(start = 0, stop = max_epsilon, step = max_epsilon/20)
 
         for e in E:
             graph, s = self.construct_simplex(epsilon = e, store = False)
@@ -136,6 +137,16 @@ class SimplicialComplex:
             gudhi.plot_persistence_diagram(diagram)
             plt.show()
         return diagram, st
+    
+    def contains(self, p, st : gudhi.SimplexTree, st_type : str):
+        
+        assert st_type == 'complex' or st_type == 'precomputed', "Invalid SimplexTree type"
+
+        if st_type == 'complex':
+            
+
+        if st_type == 'precomputed':
+
             
     def boundary_matrix(self):
         pass

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import gudhi
 from sklearn.cluster import SpectralClustering
 
+from SimplicialComplex import SimplicialComplex
+
 
 ################################
 #      PERSISTENT HOMOLOGY     #
@@ -203,7 +205,7 @@ To test the former, we just need to look at (and hopefully quantify) differences
 To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
 """
 
-def epsilon_tighten(X, Y, epsilon, plot = False):
+def epsilon_tighten(X, Y, k = 20, max_epsilon = 1, plot = False):
     """
     Given two simplicial complexes at a given epsilon value, evaluate how well-contained each point in a test set is within the complex by looking at
         1) How much the homology changes
@@ -231,10 +233,10 @@ def epsilon_tighten(X, Y, epsilon, plot = False):
     acc_tm = 0
 
     # GET COMPLEXES FROM X
-    X_data = xr.DataArray(data=X)
-
-    vr_complex = 
-    tm_complex =
+    sc = SimplicialComplex(X)
+    
+    vr_diag, vr_complex = sc.persist_precomputed(k, plot)
+    tm_diag, tm_complex = sc.persist_complex(max_epsilon, plot)
 
     vr_complex.compute_persistence()
     tm_complex.compute_persistence()
@@ -251,9 +253,9 @@ def epsilon_tighten(X, Y, epsilon, plot = False):
 
     for i in range(len(Y)):
         
-        if Y[i] in vr_complex: #!TODO: rewrite this in a way that makes sense in the syntax
+        if vr_complex.contains(Y[i]): #!TODO: rewrite this in a way that makes sense in the syntax
             acc_vr += 1
-        if Y[i] in tm_complex:
+        if tm_complex.contains(Y[i]):
             acc_tm += 1
     
     acc_vr /= len(Y)
