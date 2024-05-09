@@ -39,7 +39,7 @@ class SimplicialComplex:
         N, T = trajectory.shape
         assert N == self.N, "trajectory dimensionality does not match" 
         self.edges['trajectory'] = set()
-        for i, in range(T):
+        for i in range(T):
             v = trajectory.isel(T=i).data
             v_index = len(self.vertices)
             self.vertices.append(v)
@@ -154,3 +154,7 @@ class SimplicialComplex:
             
     def boundary_matrix(self):
         pass
+
+
+
+print("Y")

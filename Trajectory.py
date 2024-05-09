@@ -1,3 +1,14 @@
+import scipy.io as sio
+import numpy as np
+import os
+import pandas as pd
+
+import xarray as xr
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
 class zfSessionData:
     def __init__(self, fish=[], method='ep'):
         self.base_dir = "/Users/samart/Documents/Geometric DA/Final Project/RamirezPaperData/analyzedBehaviorAndImaging"        
