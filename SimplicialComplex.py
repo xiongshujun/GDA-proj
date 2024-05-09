@@ -34,13 +34,15 @@ class SimplicialComplex:
         self.graph = -1
         self.simplices = -1 # for k>=2
 
-    def construct_simplex(self, epsilon):
+    def construct_simplex(self, epsilon, store = True):
 
         if(type(self.pairwise_distances) == int):
             self.compute_pairwise_distances()
 
-        new_edges = self.connect_edges(epsilon)
-        self.form_k_simplices(new_edges, epsilon)
+        new_edges = self.__connect_edges(epsilon)
+        graph, new_simplex = self.__form_k_simplices(new_edges, epsilon, store)
+
+        return graph, new_simplex
 
     def add_trajectory(self, trajectory, connect_frames=True):
 
@@ -64,7 +66,7 @@ class SimplicialComplex:
         pairwise_distances = np.linalg.norm(pairwise_diff, axis=2)
         self.pairwise_distances = pairwise_distances
         
-    def connect_edges(self, epsilon, add=True):
+    def __connect_edges(self, epsilon, add=True):
         new_edges = []
         
         row_indices, col_indices = np.where(self.pairwise_distances < epsilon)
@@ -75,7 +77,7 @@ class SimplicialComplex:
             new_edges = self.base_edges.union(set(new_edges))
         return new_edges
 
-    def form_k_simplices(self, edges, epsilon):
+    def __form_k_simplices(self, edges, epsilon, store = True):
 
         assert len(self.vertices) > 0, "Construct graph first"
         assert len(self.base_edges) > 0, "Construct graph first"
@@ -94,8 +96,9 @@ class SimplicialComplex:
                     extract_simplices[k] = []
                 extract_simplices[k].append(c)
 
-        self.simplices.append(extract_simplices)
-        self.graph.append(graph)
+        if store:
+            self.simplices.append(extract_simplices)
+            self.graph.append(graph)
         return (graph, extract_simplices)
 
     def draw(self):
@@ -103,12 +106,33 @@ class SimplicialComplex:
         plt.show()
 
     def persist_precomputed(self, k, plot = True):
+
         if(type(self.pairwise_distances) == int):
             pairwise_distances = self.compute_pairwise_distances() 
+
         rc = gudhi.RipsComplex(distance_matrix = pairwise_distances)
         st = rc.create_simplex_tree(max_dimension=k)   
+
         diagram = st.persistence()
         if plot:
+            gudhi.plot_persistence_diagram(diagram)
+            plt.show()
+        return diagram, st
+    
+    def persist_complex(self, E, plot = True):
+
+        st = gudhi.SimplexTree()
+
+        for e in E:
+            graph, s = self.construct_simplex(epsilon = e, store = False)
+            filtration_val = np.ones((len(s), ))*e 
+            st.insert_batch(s, filtration_val)
+
+        diagram = st.persistence()
+        if plot:
+            gudhi.plot_persistence_barcode(diagram)
+            plt.show()
+
             gudhi.plot_persistence_diagram(diagram)
             plt.show()
         return diagram, st

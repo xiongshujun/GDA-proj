@@ -1,8 +1,10 @@
 import numpy as np
+import xarray as xr
 import matplotlib.pyplot as plt
 
 import gudhi
 from sklearn.cluster import SpectralClustering
+
 
 ################################
 #      PERSISTENT HOMOLOGY     #
@@ -103,7 +105,6 @@ def persist_precomputed(W, k, plot = True):
         diagram := an array of persistence diagrams computed from X
                     type : list of pairs(dimension, pair(birth, death))
         st := SimplexTree made from the VR complex defined by W (precomputed distance matrix)
-    REFERENCES
 
     """
 
@@ -216,11 +217,9 @@ def epsilon_tighten(X, Y, epsilon, plot = False):
         Y := test dataset, list of vectors that represent activity
         epsilon := feature scale chosen to build the complexes
 
-
     INTERMEDIARY VARIABLES
         vr_complex := standard Vietoris-Rips complex in the form of a simplicial tree
         tm_complex := TrajectoryMap complex in the form of a simplicial tree
-        
     
     OUTPUTS
         betti_diff := <Betti numbers of the VR complex> - <Betti numbers of the TM complex> (w/ accounted padding)
@@ -232,7 +231,9 @@ def epsilon_tighten(X, Y, epsilon, plot = False):
     acc_tm = 0
 
     # GET COMPLEXES FROM X
-    vr_complex =
+    X_data = xr.DataArray(data=X)
+
+    vr_complex = 
     tm_complex =
 
     vr_complex.compute_persistence()
