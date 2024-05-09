@@ -253,9 +253,9 @@ def epsilon_tighten(X, Y, k = 20, max_epsilon = 1, plot = False):
 
     for i in range(len(Y)):
         
-        if vr_complex.contains(Y[i]): #!TODO: rewrite this in a way that makes sense in the syntax
+        if sc.contains(Y[i], vr_complex, 'precomputed'):
             acc_vr += 1
-        if tm_complex.contains(Y[i]):
+        if sc.contains(Y[i], tm_complex, 'st_type'):
             acc_tm += 1
     
     acc_vr /= len(Y)

@@ -119,10 +119,11 @@ class SimplicialComplex:
             plt.show()
         return diagram, st
     
-    def persist_complex(self, max_epsilon, plot = True):
+    def persist_complex(self, plot = True):
 
         st = gudhi.SimplexTree()
-        E = np.arange(start = 0, stop = max_epsilon, step = max_epsilon/20)
+        max_val = np.max(self.pairwise_distances)
+        E = np.arange(start = 0, stop = max_val + 1, step = max_val/20)
 
         for e in E:
             graph, s = self.construct_simplex(epsilon = e, store = False)
@@ -142,10 +143,32 @@ class SimplicialComplex:
         
         assert st_type == 'complex' or st_type == 'precomputed', "Invalid SimplexTree type"
 
-        if st_type == 'complex':
-            
+        """
 
-        if st_type == 'precomputed':
+        p is contained in a given simplex if the vector from one vertex to it is a linear combination of 
+            geometrically independent basis vectors form by the sides of the face such that all coefficients are in the interval [0, 1]
+
+        """
+
+        simplices = st.get_simplices()
+            # returns generator with tuples(simplex, filtration)
+
+        for s, f in simplices:
+
+            if len(s) > 1:
+
+                M = []
+                p_0 = p - s[0]
+                for i in range(1, len(s)):
+                    M.append(self.trajectories(s[i]) - self.trajectories(s[0]))
+                M = np.array(M).T
+
+                coeffs, res = np.linalg.lstsq(M, p_0, rcond=None) # using least-squares regression to see if it fits
+
+                if np.max(res) < f/2 and np.min(res) > -1*f/2 and np.max(coeffs) <= 1 and np.min(coeffs) >= 0:
+                    return True
+
+        return False
 
             
     def boundary_matrix(self):
