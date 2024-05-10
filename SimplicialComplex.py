@@ -36,7 +36,7 @@ class SimplicialComplex:
         self.pairwise_distances = pairwise_distances
 
     def add_trajectory(self, trajectory, connect_frames=True, recompute_dists=False):
-        N, T = trajectory.shape
+        N, T = trajectory.data.shape
         assert N == self.N, "trajectory dimensionality does not match" 
         self.edges['trajectory'] = set()
         for i in range(T):
@@ -76,8 +76,10 @@ class SimplicialComplex:
         return(graph)
         
     def form_k_simplices(self, epsilon, kmax):
+
         assert len(self.vertices) > 0, "Construct graph first"
         assert len(self.edges) > 0, "Construct graph first"
+
         if(epsilon not in self.graphs.keys()):
             graph = self.form_graph(epsilon)
         else:
@@ -119,42 +121,40 @@ class SimplicialComplex:
                     return True
         return False
 
-    def persist_precomputed(self, k, plot = True):
-        rc = gudhi.RipsComplex(distance_matrix = self.pairwise_distances)
-        st = rc.create_simplex_tree(max_dimension=k)   
+    def persist_precomputed(self, epsilon, k = 5, plot = True):
+
+        rc = gudhi.RipsComplex(distance_matrix = self.pairwise_distances, max_edge_length = epsilon)
+        st = rc.create_simplex_tree(max_dimensions = k)
         diagram = st.persistence()
         if plot:
             gudhi.plot_persistence_barcode(diagram)
-            plt.title("Persistence Barcode")
+            plt.title("Persistence Barcode using Vietoris-Rips")
             plt.show()
             gudhi.plot_persistence_diagram(diagram)
-            plt.title("Persistence Diagram")
+            plt.title("Persistence Diagram using Vietoris-Rips")
             plt.show()
         return diagram, st
     
-    def persist_complex(self, plot = True):
+    def persist_complex(self, k = 5, plot = True):
+
         st = gudhi.SimplexTree()
         max_val = np.max(self.pairwise_distances)
         E = np.arange(start = 0, stop = max_val + 1, step = max_val/20)
 
         for e in E:
-            graph, s = self.construct_simplex(epsilon = e, store = False)
+            s = self.form_k_simplices(epsilon = e, kmax = k)
             filtration_val = np.ones((len(s), ))*e 
             st.insert_batch(s, filtration_val)
 
         diagram = st.persistence()
         if plot:
             gudhi.plot_persistence_barcode(diagram)
-            plt.title("Persistence Barcode")
+            plt.title("Persistence Barcode using TrajectoryMap")
             plt.show()
             gudhi.plot_persistence_diagram(diagram)
-            plt.title("Persistence Diagram")
+            plt.title("Persistence Diagram using TrajectoryMap")
             plt.show()
         return diagram, st
             
     def boundary_matrix(self):
         pass
-
-
-
-print("Y")

@@ -23,9 +23,8 @@ We hypothesize that TrajectoryMap is more effective on tasks that require very t
 
 Thus, there are a multitude of comparatives we need to look at.
 ## Experimental Procedure
-1) Select one of four models: PCA, IsoMap, naive simplicial complex, TrajectoryMap complex
+1) Select one of three models: PCA, naive simplicial complex, TrajectoryMap complex
 2) Select the appropriate evaluation metric
-    a) For persistent homology calculation, we are only interested in comparing the naive simplicial complex with the TrajectoryMap complex, and no training/test split is needed. 
-    b) For spectral clustering, we are interested in all four methods and need to evaluate on a training/test split.
-    c) For epsilon tightening, we are interested in comparing IsoMap vs. naive simplicial complex vs. TrajectoryMap complex. Here as well we need a training/test split.
+    a) For persistent homology calculation, we are interested in comparing PCA and the naive simplicial complex with the TrajectoryMap complex, and no training/test split is needed. 
+    b) For epsilon tightening, we are interested in comparing naive simplicial complex vs. TrajectoryMap complex. Here as well we need a training/test split.
 3) Select the dataset we evaluate on!

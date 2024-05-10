@@ -87,7 +87,7 @@ def persist_complex(S, E, plot = True):
 #   SPECTRAL CLUSTERING  #
 ##########################
 
-def cluster(X, k, assign_labels = 'discretize'):
+def cluster(X, assign_labels = 'discretize'):
     """
     Wrapper for scikit.learn.SpectralClustering
 
@@ -124,7 +124,7 @@ To test the former, we just need to look at (and hopefully quantify) differences
 To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
 """
 
-def epsilon_tighten(X, Y, k = 20, max_epsilon = 1, plot = False):
+def epsilon_tighten(sc, Y, k = 5, max_epsilon = 1, plot = False):
     """
     Given two simplicial complexes at a given epsilon value, evaluate how well-contained each point in a test set is within the complex by looking at
         1) How much the homology changes
@@ -134,7 +134,7 @@ def epsilon_tighten(X, Y, k = 20, max_epsilon = 1, plot = False):
             !NOTE: in future work, this can also be quantified better by measuring distance from the nearest face
     
     INPUTS
-        X := train dataset as an xr.DataArray, list of vectors that represent activity
+        sc := train dataset as an xr.DataArray, list of vectors that represent activity
         Y := test dataset as an xr.DataArray, list of vectors that represent activity
         epsilon := feature scale chosen to build the complexes
 
@@ -151,11 +151,9 @@ def epsilon_tighten(X, Y, k = 20, max_epsilon = 1, plot = False):
     acc_vr = 0
     acc_tm = 0
 
-    # GET COMPLEXES FROM X
-    sc = SimplicialComplex(X)
-    
-    vr_diag, vr_complex = sc.persist_precomputed(k, plot)
-    tm_diag, tm_complex = sc.persist_complex(max_epsilon, plot)
+    # GET COMPLEXES FROM sc    
+    vr_diag, vr_complex = sc.persist_precomputed(max_epsilon, k, plot)
+    tm_diag, tm_complex = sc.persist_complex(plot)
 
     vr_complex.compute_persistence()
     tm_complex.compute_persistence()
