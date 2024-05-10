@@ -124,7 +124,7 @@ To test the former, we just need to look at (and hopefully quantify) differences
 To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
 """
 
-def epsilon_tighten(sc, Y, k = 5, max_epsilon = 1, plot = False):
+def epsilon_tighten(sc, Y, max_epsilon = 1, plot = False):
     """
     Given two simplicial complexes at a given epsilon value, evaluate how well-contained each point in a test set is within the complex by looking at
         1) How much the homology changes
@@ -152,8 +152,8 @@ def epsilon_tighten(sc, Y, k = 5, max_epsilon = 1, plot = False):
     acc_tm = 0
 
     # GET COMPLEXES FROM sc    
-    vr_diag, vr_complex = sc.persist_precomputed(max_epsilon, k, plot)
-    tm_diag, tm_complex = sc.persist_complex(plot)
+    vr_diag, vr_complex = sc.persist_precomputed(max_epsilon, plot)
+    tm_diag, tm_complex = sc.persist_complex(max_epsilon, plot)
 
     vr_complex.compute_persistence()
     tm_complex.compute_persistence()

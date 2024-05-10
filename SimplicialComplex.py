@@ -121,10 +121,10 @@ class SimplicialComplex:
                     return True
         return False
 
-    def persist_precomputed(self, epsilon, k = 5, plot = True):
+    def persist_precomputed(self, epsilon, plot = True):
 
-        rc = gudhi.RipsComplex(distance_matrix = self.pairwise_distances, max_edge_length = epsilon)
-        st = rc.create_simplex_tree(max_dimensions = k)
+        rc = gudhi.RipsComplex(points = self.trajectories[0].data.T, max_edge_length = epsilon)
+        st = rc.create_simplex_tree(max_dimension = len(self.trajectories[0].data.T))
         diagram = st.persistence()
         if plot:
             gudhi.plot_persistence_barcode(diagram)
@@ -135,11 +135,10 @@ class SimplicialComplex:
             plt.show()
         return diagram, st
     
-    def persist_complex(self, k = 5, plot = True):
+    def persist_complex(self, max_epsilon, k = 5, plot = True):
 
         st = gudhi.SimplexTree()
-        max_val = np.max(self.pairwise_distances)
-        E = np.arange(start = 0, stop = max_val + 1, step = max_val/20)
+        E = np.arange(start = 0, stop = max_epsilon, step = max_epsilon/20)
 
         for e in E:
             s = self.form_k_simplices(epsilon = e, kmax = k)
