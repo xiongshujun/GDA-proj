@@ -124,7 +124,7 @@ To test the former, we just need to look at (and hopefully quantify) differences
 To test the latter, we form partial complexes on training sets then evaluate the accuracy of predictions on test sets. 
 """
 
-def epsilon_tighten(sc, Y, max_epsilon = 1, plot = False):
+def epsilon_tighten(sc, Y, max_epsilon = 4, k = 116, plot = False):
     """
     Given two simplicial complexes at a given epsilon value, evaluate how well-contained each point in a test set is within the complex by looking at
         1) How much the homology changes
@@ -152,8 +152,8 @@ def epsilon_tighten(sc, Y, max_epsilon = 1, plot = False):
     acc_tm = 0
 
     # GET COMPLEXES FROM sc    
-    vr_diag, vr_complex = sc.persist_precomputed(max_epsilon, plot)
-    tm_diag, tm_complex = sc.persist_complex(max_epsilon, plot)
+    vr_diag, vr_complex = sc.persist_VR(max_epsilon, k, plot)
+    tm_diag, tm_complex = sc.persist_complex(max_epsilon, k = 5, fidelity = 2000, plot = plot)
 
     vr_complex.compute_persistence()
     tm_complex.compute_persistence()
@@ -166,16 +166,18 @@ def epsilon_tighten(sc, Y, max_epsilon = 1, plot = False):
     while len(betti_tm) < len(betti_vr):
         betti_tm.append(0)
 
-    betti_diff = betti_vr - betti_tm
+    betti_diff = np.array(betti_vr) - np.array(betti_tm)
 
-    for i in range(len(Y)):
+    test = Y[0].data
+    nearest_k = 10
+    for i in range(len(test)):
         
-        if sc.contains(Y[i], vr_complex, 'precomputed'):
+        if sc.contains(test[i], nearest_k, vr_complex, 'precomputed'):
             acc_vr += 1
-        if sc.contains(Y[i], tm_complex, 'st_type'):
+        if sc.contains(test[i], nearest_k, tm_complex, 'complex'):
             acc_tm += 1
     
-    acc_vr /= len(Y)
-    acc_tm /= len(Y)
+    acc_vr /= len(test)
+    acc_tm /= len(test)
         
     return betti_diff, acc_vr, acc_tm

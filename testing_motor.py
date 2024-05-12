@@ -17,7 +17,7 @@ traj = zf.load_motor_trajectory(norm=True)
 interval = 10
 traj_sampled = traj.isel(T=slice(None, None, interval))
 
-test_idx = np.arange(interval//2, len(traj[0]), interval)
+test_idx = np.arange(interval//4, len(traj[0]), interval//2)
 traj_sampled_test = traj.isel(T=test_idx)
 
 sc = SimplicialComplex([traj_sampled]) # Simplicial complex based on sampled data
@@ -49,7 +49,6 @@ def eval_motor(twod_pca = False, threed_pca = False, tighten = True, max_epsilon
         plt.title("Persistence Diagram of 2D PCA")
         plt.show()
 
-
     # 3D PCA
     if threed_pca:
         pca_3 = PCA(n_components=3)
@@ -72,8 +71,8 @@ def eval_motor(twod_pca = False, threed_pca = False, tighten = True, max_epsilon
     if tighten:
         betti_diff, acc_vr, acc_tm = epsilon_tighten(sc, [traj_sampled_test], max_epsilon = max_epsilon, plot = True)
 
-        print("The difference in Betti values at different levels is: " + betti_diff)
-        print("The accuracy of Vietoris-Rips complexes is: " + acc_vr)
-        print("The accuracy of TrajectoryMap is: " + acc_tm)
+        print("The difference in Betti values at different levels is: " + str(betti_diff.tolist()))
+        print("The accuracy of Vietoris-Rips complexes is: " + str(acc_vr))
+        print("The accuracy of TrajectoryMap is: " + str(acc_tm))
 
 eval_motor()

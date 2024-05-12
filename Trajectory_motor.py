@@ -45,7 +45,7 @@ class zfSessionDataMotor:
     def load_motor_trajectory(self, norm=False):
         df = pd.read_csv("motor_data.csv").drop(['Unnamed: 0'], axis=1)
         t, N = df.values.shape # num_samples x num_cells
-        da = xr.DataArray(df.values.T, dims=('N', 'T'), coords={'N' : np.arange(1, N+1), 'T' : np.arange(0, t)})
+        da = xr.DataArray(df.values, dims=('T', 'N'), coords={'N' : np.arange(1, N+1), 'T' : np.arange(0, t)})
         if(norm):
             da = (da - da.mean(dim='T')) / da.mean(dim='T')
         return(da)
